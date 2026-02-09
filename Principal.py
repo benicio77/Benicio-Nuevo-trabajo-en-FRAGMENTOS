@@ -28,7 +28,7 @@ def main():
 
     print("\n=== Información inicial (solo para pruebas) ===")
     for jugador in jugadores:
-        conoce = "CONOCE la palabra" if partida.jugador_conoce_palabra(jugador) else "NO conoce la palabra"
+        conoce = "CONOCE la palabra" if partida.obtener_palabra_jugador(jugador) else "NO conoce la palabra"
         print(f"{jugador}: {conoce}")
 
     print("\n=== Comienza la partida ===")
@@ -54,10 +54,27 @@ def main():
                 else:
                     print("Jugador no válido. Intenta de nuevo.")
 
-        expulsado = partida.votar(votos)
-        print(f"\nJugador expulsado: {expulsado}")
+        expulsado, era_impostor = partida.votar(votos)
 
-        partida.siguiente_ronda()
+        print(f"\nJugador expulsado: {expulsado}")
+        print("Era impostor" if era_impostor else "No era impostor")
+
+        # Eliminar al expulsado del juego
+        if expulsado in jugadores:
+            jugadores.remove(expulsado)
+
+        # Si ya no quedan impostores, termina
+        if not any(j in partida.impostores for j in jugadores):
+            print("\n¡Los jugadores han ganado! No quedan impostores.")
+            break
+
+        # Si los impostores son mayoría, ganan
+        if len([j for j in jugadores if j in partida.impostores]) >= len(jugadores) / 2:
+            print("\n¡Los impostores han ganado! Son mayoría.")
+            break
+
+        if not partida.siguiente_ronda():
+            break
 
     print("\n=== Fin de la partida ===")
 
