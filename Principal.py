@@ -1,82 +1,187 @@
 principal
 # principal.py
-from partida import partida
 
-def pedir_lista_jugadores():
-    jugadores = input("Introduce la lista de jugadores (separados por coma): ")
-    return [j.strip() for j in jugadores.split(",") if j.strip()]
+import pygame
+from graficos import Graficos
+from partida import Partida
 
-def pedir_palabra():
-    return input("Introduce la palabra secreta: ").strip()
 
-def pedir_entero(mensaje):
+# ---------------------------------------------------------
+# 1. manejar_click()
+# ---------------------------------------------------------
+def manejar_click(posicion, partida, pantalla_actual):
+    x, y = posicion
+
+    if pantalla_actual == "rol":
+        return {"accion": "continuar"}
+
+    if pantalla_actual == "palabra":
+        return {"accion": "continuar"}
+
+    if pantalla_actual == "votacion":
+        ancho_boton = 300
+        alto_boton = 60
+        espacio = 20
+
+        total_altura = len(partida.jugadores) * (alto_boton + espacio)
+        inicio_y = (600 - total_altura) // 2
+        inicio_x = (800 - ancho_boton) // 2
+
+        for i, jugador in enumerate(partida.jugadores):
+            bx = inicio_x
+            by = inicio_y + i * (alto_boton + espacio)
+
+            if bx <= x <= bx + ancho_boton and by <= y <= by + alto_boton:
+                return {"accion": "votar", "objetivo": jugador}
+
+        return {"accion": "ninguna"}
+
+    if pantalla_actual == "resultados":
+        return {"accion": "continuar"}
+
+    if pantalla_actual == "fin":
+        return {"accion": "salir"}
+
+    return {"accion": "ninguna"}
+
+
+# ---------------------------------------------------------
+# 2. manejar_tecla()
+# ---------------------------------------------------------
+def manejar_tecla(tecla, partida, pantalla_actual):
+    if pantalla_actual == "rol" and tecla == "ENTER":
+        return {"accion": "continuar"}
+
+    if pantalla_actual == "palabra" and tecla == "ENTER":
+        return {"accion": "continuar"}
+
+    if pantalla_actual == "votacion":
+        if tecla == "ESC":
+            return {"accion": "cancelar_votacion"}
+        if tecla == "ENTER":
+            return {"accion": "confirmar_voto"}
+
+    if pantalla_actual == "resultados" and tecla == "ENTER":
+        return {"accion": "continuar"}
+
+    if pantalla_actual == "fin" and tecla == "ENTER":
+        return {"accion": "salir"}
+
+    if tecla == "R":
+        return {"accion": "avanzar_ronda"}
+
+    if tecla == "ESC":
+        return {"accion": "salir"}
+
+    return {"accion": "ninguna"}
+
+
+# ---------------------------------------------------------
+# 3. iniciar_partida()
+# ---------------------------------------------------------
+def iniciar_partida():
+    nombre = input("Nombre de la partida: ")
+
     while True:
         try:
-            return int(input(mensaje))
+            num = int(input("Número de jugadores: "))
+            if num > 0:
+                break
         except ValueError:
-            print("Por favor, introduce un número válido.")
+            pass
+        print("Introduce un número válido.")
 
-def main():
-    print("=== Configuración de la partida ===")
+    partida = Partida(nombre, num)
 
-    palabra_secreta = pedir_palabra()
-    jugadores = pedir_lista_jugadores()
-    num_impostores = pedir_entero("Número de impostores: ")
-    num_rondas = pedir_entero("Número de rondas: ")
+    print("\nIntroduce los nombres de los jugadores:")
+    for i in range(num):
+        nombre_jugador = input(f"Jugador {i+1}: ")
+        partida.jugadores.append(nombre_jugador)
 
-    partida = partida(palabra_secreta, jugadores, num_impostores, num_rondas)
+    partida.asignar_roles()
 
-    print("\n=== Información inicial (solo para pruebas) ===")
-    for jugador in jugadores:
-        conoce = "CONOCE la palabra" if partida.obtener_palabra_jugador(jugador) else "NO conoce la palabra"
-        print(f"{jugador}: {conoce}")
+    print("\nIntroduce palabras posibles (separadas por comas):")
+    lista = input("Palabras: ").split(",")
+    lista = [p.strip() for p in lista if p.strip()]
 
-    print("\n=== Comienza la partida ===")
+    partida.generar_palabra_secreta(lista)
 
-    for ronda in range(1, num_rondas + 1):
-        print(f"\n--- Ronda {ronda} ---")
+    return partida
 
-        # palabras relacionadas
-        palabras_dichas = {}
-        for jugador in jugadores:
-            palabra = input(f"{jugador}, di una palabra relacionada: ")
-            palabras_dichas[jugador] = palabra
 
-        # Votaciones
-        votos = {}
-        print("\n--- Votación ---")
-        for jugador in jugadores:
-            while True:
-                voto = input(f"{jugador}, vota a alguien: ").strip()
-                if voto in jugadores:
-                    votos[jugador] = voto
-                    break
-                else:
-                    print("Jugador no válido. Intenta de nuevo.")
+# ---------------------------------------------------------
+# 4. bucle_principal()
+# ---------------------------------------------------------
+def bucle_principal():
+    pygame.init()
 
-        expulsado, era_impostor = partida.votar(votos)
+    pantalla = pygame.display.set_mode((800, 600))
+    reloj = pygame.time.Clock()
 
-        print(f"\nJugador expulsado: {expulsado}")
-        print("Era impostor" if era_impostor else "No era impostor")
+    graficos = Graficos()
+    partida = Partida("Partida 1", 4)
+    partida.jugadores = ["Ana", "Luis", "Marta", "Pedro"]
 
-        # Eliminar al expulsado del juego
-        if expulsado in jugadores:
-            jugadores.remove(expulsado)
+    pantalla_actual = "rol"
+    ejecutando = True
 
-        # Si ya no quedan impostores, termina
-        if not any(j in partida.impostores for j in jugadores):
-            print("\n¡Los jugadores han ganado! No quedan impostores.")
-            break
+    while ejecutando:
+        for evento in pygame.event.get():
+            if evento.type == pygame.QUIT:
+                ejecutando = False
 
-        # Si los impostores son mayoría, ganan
-        if len([j for j in jugadores if j in partida.impostores]) >= len(jugadores) / 2:
-            print("\n¡Los impostores han ganado! Son mayoría.")
-            break
+            if evento.type == pygame.MOUSEBUTTONDOWN:
+                pos = pygame.mouse.get_pos()
+                accion = manejar_click(pos, partida, pantalla_actual)
 
-        if not partida.siguiente_ronda():
-            break
+                if accion["accion"] == "votar":
+                    pantalla_actual = "resultados"
 
-    print("\n=== Fin de la partida ===")
+                elif accion["accion"] == "continuar":
+                    if pantalla_actual == "rol":
+                        pantalla_actual = "palabra"
+                    elif pantalla_actual == "palabra":
+                        pantalla_actual = "votacion"
+                    elif pantalla_actual == "resultados":
+                        pantalla_actual = "fin"
 
-if __name__ == "__main__":
-    main()
+                elif accion["accion"] == "salir":
+                    ejecutando = False
+
+            if evento.type == pygame.KEYDOWN:
+                tecla = pygame.key.name(evento.key).upper()
+                accion = manejar_tecla(tecla, partida, pantalla_actual)
+
+                if accion["accion"] == "avanzar_ronda":
+                    partida.avanzar_ronda()
+
+                elif accion["accion"] == "continuar":
+                    if pantalla_actual == "rol":
+                        pantalla_actual = "palabra"
+                    elif pantalla_actual == "palabra":
+                        pantalla_actual = "votacion"
+                    elif pantalla_actual == "resultados":
+                        pantalla_actual = "fin"
+
+                elif accion["accion"] == "salir":
+                    ejecutando = False
+
+        if pantalla_actual == "rol":
+            graficos.mostrar_rol(pantalla, "normal")
+
+        elif pantalla_actual == "palabra":
+            graficos.mostrar_palabra(pantalla, "gato")
+
+        elif pantalla_actual == "votacion":
+            graficos.mostrar_votacion(pantalla, partida.jugadores)
+
+        elif pantalla_actual == "resultados":
+            graficos.mostrar_resultados_votacion(pantalla, partida.votos)
+
+        elif pantalla_actual == "fin":
+            graficos.mostrar_fin(pantalla, "Jugadores")
+
+        pygame.display.flip()
+        reloj.tick(60)
+
+    pygame.quit()
