@@ -160,3 +160,21 @@ class Graficos:
         rect_ganador = texto_ganador.get_rect(center=(pantalla.get_width() // 2,
                                                       pantalla.get_height() // 2))
         pantalla.blit(texto_ganador, rect_ganador)
+
+    # ---------------------------------------------------------
+    # Mostrar mensaje de guardado
+    # ---------------------------------------------------------
+    def mostrar_guardado(self, pantalla, archivo_guardado):
+        pantalla.fill((0, 0, 0))
+
+        fuente = pygame.font.SysFont(None, 60)
+        texto = fuente.render(f"Guardado: {archivo_guardado}", True, (255, 255, 0))
+        rect = texto.get_rect(center=(pantalla.get_width() // 2,
+                                      pantalla.get_height() // 2))
+        pantalla.blit(texto, rect)
+
+        fuente_inst = pygame.font.SysFont(None, 40)
+        instruccion = fuente_inst.render("Presiona ENTER para continuar", True, (100, 100, 100))
+        rect_inst = instruccion.get_rect(center=(pantalla.get_width() // 2,
+                                                   pantalla.get_height() - 100))
+        pantalla.blit(instruccion, rect_inst)

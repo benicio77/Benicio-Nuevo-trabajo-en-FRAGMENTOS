@@ -4,6 +4,7 @@
 import pygame
 from graficos import Graficos
 from partida import Partida
+from juego import guardar_partida  # módulo nuevo que simplemente escribe un guardado sin alterar la partida
 
 
 # ---------------------------------------------------------
@@ -138,6 +139,10 @@ def bucle_principal():
     jugador_actual = 0
     voto_actual = None
     en_fase_palabras = True  # Rastrear si aún estamos en la fase de ver palabras
+
+    # Variables para el guardado "random"
+    guardado_activo = False
+    guardado_archivo = None
     
     ejecutando = True
 
@@ -184,8 +189,22 @@ def bucle_principal():
 
             if evento.type == pygame.KEYDOWN:
                 tecla = pygame.key.name(evento.key).upper()
+
+                # si estamos mostrando el mensaje de guardado, sólo ENTER lo cierra
+                if guardado_activo:
+                    if tecla == "RETURN":
+                        guardado_activo = False
+                    continue
+
                 pantalla_para_tecla = "fin" if fase_actual == FASE_FIN else "resultados" if fase_actual == FASE_RESULTADOS else "votacion" if fase_actual == FASE_VOTACION else "palabra"
                 accion = manejar_tecla(tecla, partida, pantalla_para_tecla)
+
+                # tecla G: crear guardado sin afectar el juego
+                if tecla == "G":
+                    ruta = guardar_partida(partida)
+                    guardado_archivo = ruta or "error_guardado"
+                    guardado_activo = True
+                    continue
 
                 if accion["accion"] == "continuar":
                     if fase_actual == FASE_TRANSICION:
@@ -230,36 +249,40 @@ def bucle_principal():
                 elif accion["accion"] == "salir":
                     ejecutando = False
 
-        # Renderizar según fase actual
-        if fase_actual == FASE_TRANSICION:
-            if en_fase_palabras:
-                # Transición entre palabras
-                if jugador_actual < len(partida.jugadores):
-                    graficos.mostrar_transicion(pantalla, jugador_actual + 1)
-            else:
-                # Transición de votación
-                if jugador_actual < len(partida.jugadores):
-                    graficos.mostrar_transicion(pantalla, f"Votación - Jugador {jugador_actual + 1}")
-        
-        elif fase_actual == FASE_PALABRA:
-            rol_actual = partida.roles_asignados.get(partida.jugadores[jugador_actual], "normal")
-            if rol_actual == "impostor":
-                graficos.mostrar_palabra(pantalla, "impostor", jugador_actual + 1)
-            else:
-                graficos.mostrar_palabra(pantalla, partida.palabra_secreta or "desconocida", jugador_actual + 1)
+        # Si estamos mostrando el guardado, no se procesa ninguna otra fase
+        if guardado_activo:
+            graficos.mostrar_guardado(pantalla, guardado_archivo)
+        else:
+            # Renderizar según fase actual
+            if fase_actual == FASE_TRANSICION:
+                if en_fase_palabras:
+                    # Transición entre palabras
+                    if jugador_actual < len(partida.jugadores):
+                        graficos.mostrar_transicion(pantalla, jugador_actual + 1)
+                else:
+                    # Transición de votación
+                    if jugador_actual < len(partida.jugadores):
+                        graficos.mostrar_transicion(pantalla, f"Votación - Jugador {jugador_actual + 1}")
 
-        elif fase_actual == FASE_VOTACION:
-            graficos.mostrar_votacion_individual(pantalla, jugador_actual + 1, len(partida.jugadores))
+            elif fase_actual == FASE_PALABRA:
+                rol_actual = partida.roles_asignados.get(partida.jugadores[jugador_actual], "normal")
+                if rol_actual == "impostor":
+                    graficos.mostrar_palabra(pantalla, "impostor", jugador_actual + 1)
+                else:
+                    graficos.mostrar_palabra(pantalla, partida.palabra_secreta or "desconocida", jugador_actual + 1)
 
-        elif fase_actual == FASE_RESULTADOS:
-            graficos.mostrar_resultados_votacion(pantalla, partida.votos)
+            elif fase_actual == FASE_VOTACION:
+                graficos.mostrar_votacion_individual(pantalla, jugador_actual + 1, len(partida.jugadores))
 
-        elif fase_actual == FASE_FIN:
-            ganador = partida.determinar_ganador()
-            if ganador:
-                graficos.mostrar_fin(pantalla, ganador.capitalize())
-            else:
-                graficos.mostrar_fin(pantalla, "Empate")
+            elif fase_actual == FASE_RESULTADOS:
+                graficos.mostrar_resultados_votacion(pantalla, partida.votos)
+
+            elif fase_actual == FASE_FIN:
+                ganador = partida.determinar_ganador()
+                if ganador:
+                    graficos.mostrar_fin(pantalla, ganador.capitalize())
+                else:
+                    graficos.mostrar_fin(pantalla, "Empate")
 
         pygame.display.flip()
         reloj.tick(60)

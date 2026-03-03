@@ -1,0 +1,15 @@
+{
+  "nombre_partida": "test",
+  "numero_jugadores": 2,
+  "jugadores": [
+    "A",
+    "B"
+  ],
+  "roles_asignados": {
+    "A": "impostor",
+    "B": "normal"
+  },
+  "palabra_secreta": "mundo",
+  "votos": {},
+  "ronda_actual": 0
+}
