@@ -1,0 +1,91 @@
+# Benicio-Nuevo-trabajo-en-FRAGMENTOS
+1. Crear clase Partida
+
+    Crea únicamente la clase Partida dentro del archivo partida.py.
+    Debe almacenar: nombre de la partida, número de jugadores, lista de jugadores, palabra secreta, roles asignados, ronda actual y tiempo restante.
+    No generes lógica de juego completa, solo la estructura básica y los atributos.
+
+2. Función para asignar roles
+
+    Crea en partida.py una función dentro de la clase Partida llamada asignar_roles().
+    Debe asignar un impostor aleatorio y marcar al resto como jugadores normales.
+    No generes código gráfico ni interacción, solo la lógica.
+
+3. Función para generar palabra secreta
+
+    Crea en partida.py una función llamada generar_palabra_secreta(lista_palabras).
+    Debe elegir una palabra aleatoria de la lista y guardarla en la partida.
+    No generes nada visual.
+
+4. Función para avanzar de ronda
+
+    Crea en partida.py una función llamada avanzar_ronda().
+    Debe incrementar el número de ronda y reiniciar el tiempo si es necesario.
+    No añadas lógica de juego adicional.
+
+5. Función para registrar un voto
+
+    Crea en partida.py una función llamada registrar_voto(jugador, objetivo).
+    Debe almacenar el voto en una estructura interna.
+    No generes pantallas ni gráficos.
+
+🟦 PROMPTS PARA graficos.py (representación visual)
+6. Mostrar rol del jugador
+
+    Crea en graficos.py una función llamada mostrar_rol(pantalla, rol).
+    Debe dibujar en pantalla el rol del jugador usando Pygame.
+    No debe modificar datos de la partida, solo dibujar.
+
+7. Mostrar palabra secreta
+
+    Crea en graficos.py una función llamada mostrar_palabra(pantalla, palabra).
+    Debe mostrar la palabra secreta en pantalla.
+    No generes lógica de partida.
+
+8. Pantalla de votación
+
+    Crea en graficos.py una función llamada mostrar_votacion(pantalla, jugadores).
+    Debe dibujar botones o elementos clicables para votar.
+    No debe registrar votos ni modificar datos, solo representar.
+
+9. Pantalla de resultados de votación
+
+    Crea en graficos.py una función llamada mostrar_resultados_votacion(pantalla, votos).
+    Solo debe mostrar los resultados visualmente.
+
+10. Pantalla de fin de partida
+
+    Crea en graficos.py una función llamada mostrar_fin(pantalla, ganador).
+    Debe mostrar quién ganó.
+    No debe reiniciar la partida ni modificar datos.
+
+🟥 PROMPTS PARA principal.py (eventos y flujo del juego)
+11. Manejar clic del ratón
+
+    Crea en principal.py una función llamada manejar_click(posicion, partida).
+    Debe interpretar el clic según la pantalla actual, pero sin generar gráficos.
+    Solo debe decidir qué acción lógica corresponde.
+
+12. Manejar teclas
+
+    Crea en principal.py una función llamada manejar_tecla(tecla, partida).
+    Debe interpretar teclas como avanzar ronda, confirmar, etc.
+    No debe dibujar nada.
+
+13. Bucle principal del juego
+
+    Crea en principal.py una función llamada bucle_principal().
+    Debe gestionar eventos de Pygame, actualizar la partida y llamar a funciones gráficas.
+    No generes el juego completo, solo la estructura base del bucle.
+
+14. Función para iniciar partida
+
+    Crea en principal.py una función llamada iniciar_partida().
+    Debe crear una instancia de Partida, pedir datos iniciales y prepararla.
+    No generes pantallas ni gráficos.
+
+15. Función para procesar votación
+
+    Crea en principal.py una función llamada procesar_votacion(partida).
+    Debe leer los votos almacenados en partida y decidir quién es expulsado.
+    No debe dibujar nada.
