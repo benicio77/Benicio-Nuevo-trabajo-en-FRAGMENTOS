@@ -1,4 +1,4 @@
-principal
+
 # principal.py
 
 import pygame
@@ -116,11 +116,21 @@ def bucle_principal():
     pygame.init()
 
     pantalla = pygame.display.set_mode((800, 600))
+    pygame.display.set_caption("Juego de Impostor")
     reloj = pygame.time.Clock()
 
     graficos = Graficos()
     partida = Partida("Partida 1", 4)
     partida.jugadores = ["Ana", "Luis", "Marta", "Pedro"]
+    
+    # Asignar roles y palabra secreta
+    partida.asignar_roles()
+    lista_palabras = ["gato", "perro", "casa", "sol", "luna"]
+    partida.generar_palabra_secreta(lista_palabras)
+    
+    # Rastrear jugador actual y votos temporales
+    jugador_actual = 0
+    voto_actual = None
 
     pantalla_actual = "rol"
     ejecutando = True
@@ -135,6 +145,7 @@ def bucle_principal():
                 accion = manejar_click(pos, partida, pantalla_actual)
 
                 if accion["accion"] == "votar":
+                    voto_actual = accion["objetivo"]
                     pantalla_actual = "resultados"
 
                 elif accion["accion"] == "continuar":
@@ -161,21 +172,34 @@ def bucle_principal():
                     elif pantalla_actual == "palabra":
                         pantalla_actual = "votacion"
                     elif pantalla_actual == "resultados":
-                        pantalla_actual = "fin"
+                        # Avanzar al siguiente jugador o terminar
+                        if jugador_actual < len(partida.jugadores) - 1:
+                            jugador_actual += 1
+                            pantalla_actual = "rol"
+                        else:
+                            pantalla_actual = "fin"
 
                 elif accion["accion"] == "salir":
                     ejecutando = False
 
         if pantalla_actual == "rol":
-            graficos.mostrar_rol(pantalla, "normal")
+            rol = partida.roles_asignados.get(partida.jugadores[jugador_actual], "normal")
+            graficos.mostrar_rol(pantalla, rol)
 
         elif pantalla_actual == "palabra":
-            graficos.mostrar_palabra(pantalla, "gato")
+            rol_actual = partida.roles_asignados.get(partida.jugadores[jugador_actual], "normal")
+            if rol_actual == "impostor":
+                graficos.mostrar_palabra(pantalla, "???")
+            else:
+                graficos.mostrar_palabra(pantalla, partida.palabra_secreta or "desconocida")
 
         elif pantalla_actual == "votacion":
             graficos.mostrar_votacion(pantalla, partida.jugadores)
 
         elif pantalla_actual == "resultados":
+            if voto_actual:
+                partida.registrar_voto(partida.jugadores[jugador_actual], voto_actual)
+                voto_actual = None
             graficos.mostrar_resultados_votacion(pantalla, partida.votos)
 
         elif pantalla_actual == "fin":
@@ -185,3 +209,10 @@ def bucle_principal():
         reloj.tick(60)
 
     pygame.quit()
+
+
+# ---------------------------------------------------------
+# Iniciar el juego
+# ---------------------------------------------------------
+if __name__ == "__main__":
+    bucle_principal()
