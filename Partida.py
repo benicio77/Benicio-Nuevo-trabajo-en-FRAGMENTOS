@@ -1,4 +1,4 @@
-Partida
+partida
 import random
 from collections import Counter
 

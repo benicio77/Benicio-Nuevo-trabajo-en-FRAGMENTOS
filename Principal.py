@@ -1,6 +1,6 @@
-Principal
+principal
 # principal.py
-from partida import Partida
+from partida import partida
 
 def pedir_lista_jugadores():
     jugadores = input("Introduce la lista de jugadores (separados por coma): ")
@@ -24,7 +24,7 @@ def main():
     num_impostores = pedir_entero("Número de impostores: ")
     num_rondas = pedir_entero("Número de rondas: ")
 
-    partida = Partida(palabra_secreta, jugadores, num_impostores, num_rondas)
+    partida = partida(palabra_secreta, jugadores, num_impostores, num_rondas)
 
     print("\n=== Información inicial (solo para pruebas) ===")
     for jugador in jugadores:
@@ -36,7 +36,7 @@ def main():
     for ronda in range(1, num_rondas + 1):
         print(f"\n--- Ronda {ronda} ---")
 
-        # Palabras relacionadas
+        # palabras relacionadas
         palabras_dichas = {}
         for jugador in jugadores:
             palabra = input(f"{jugador}, di una palabra relacionada: ")

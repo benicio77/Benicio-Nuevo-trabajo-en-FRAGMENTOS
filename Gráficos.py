@@ -1,7 +1,7 @@
 import pygame
 import sys
 
-class Graficos:
+class graficos:
     def __init__(self, ancho=800, alto=600):
         pygame.init()
         self.ventana = pygame.display.set_mode((ancho, alto))
